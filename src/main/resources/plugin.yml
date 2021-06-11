@@ -1,0 +1,14 @@
+name: ASChest
+version: ${project.version}
+main: net.dohaw.aschest.ASChestPlugin
+api-version: 1.16
+
+commands:
+  autosellchest:
+    aliases:
+      - asc
+      - aschest
+
+permissions:
+  asc.use:
+    default: op
