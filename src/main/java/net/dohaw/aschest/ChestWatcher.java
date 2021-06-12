@@ -4,6 +4,7 @@ import de.takacick.coinapi.CoinAPI;
 import de.takacick.shop.Shop;
 import net.dohaw.corelib.StringUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
@@ -40,8 +41,8 @@ public class ChestWatcher implements Listener {
         Block blockPlaced = e.getBlockPlaced();
         ItemStack itemInHand = e.getItemInHand();
         if(plugin.isAutoSellChestItem(itemInHand)){
-            plugin.getAutoSellChestLocations().add(blockPlaced.getLocation());
             Player player = e.getPlayer();
+            plugin.addAutoSellChest(player.getUniqueId(), blockPlaced.getLocation());
             player.sendMessage(StringUtils.colorString("&aYou have placed down an auto sell chest!"));
         }
 
@@ -102,14 +103,26 @@ public class ChestWatcher implements Listener {
 
     }
 
+    /*
+        Notifies the chest owner every single time someone s
+     */
     @EventHandler
     public void onCloseASChest(InventoryCloseEvent e){
 
         Inventory inv = e.getInventory();
-        if(plugin.isAutoSellChest(inv.getLocation())){
-            Player player = (Player) e.getPlayer();
-            int revenue = sellingSessions.remove(player.getUniqueId());
-            player.sendMessage(StringUtils.colorString("&a+&6&b"+ revenue));
+        Location invLocation = inv.getLocation();
+        if(invLocation != null && plugin.isAutoSellChest(invLocation)){
+
+            UUID chestOwnerUUID = plugin.getAutoSellChestOwner(invLocation);
+
+            Player seller = (Player) e.getPlayer();
+            Player chestOwner = Bukkit.getPlayer(chestOwnerUUID);
+            int revenue = sellingSessions.remove(seller.getUniqueId());
+
+            if(revenue != 0 && chestOwner != null){
+                chestOwner.sendMessage(StringUtils.colorString("&a+&6&b"+ revenue));
+            }
+
         }
 
     }
@@ -119,8 +132,8 @@ public class ChestWatcher implements Listener {
 
         Block block = e.getBlock();
         if(plugin.isAutoSellChest(block)){
-            plugin.getAutoSellChestLocations().remove(block.getLocation());
             Player player = e.getPlayer();
+            plugin.removeAutoSellChest(player.getUniqueId(), block.getLocation());
             player.sendMessage(StringUtils.colorString("&bYou have broken a auto sell chest!"));
         }
 

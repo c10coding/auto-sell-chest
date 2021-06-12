@@ -27,7 +27,7 @@ public class ASChestCommand implements CommandExecutor {
             player.sendMessage(StringUtils.colorString("&bYou have been given an auto sell chest!"));
         }
 
-        return false;
+        return true;
     }
 
 }
